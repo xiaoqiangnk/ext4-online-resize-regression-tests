@@ -45,11 +45,16 @@ resizefs()
 {
 	echo "resizing $DEVICE from $FROM to $TO..."
 	if $RESIZEFS $DEVICE $TO &>/dev/null ; then
-		echo -e "succeeded!\n"
+		size_human=`df -h /dev/sdc1 | awk '$1~"/dev/sdc1" {sub("\.0", "", $2); print $2}'`
+		size=`df /dev/sdc1 | awk '$1~"/dev/sdc1" {print $2}'`
+		if [ $size = $TO ] || [ $size_human = $TO ] ; then
+			echo -e "succeeded!\n"
+		else
+			echo -e "failed!\n"
+		fi
 	else
 		echo -e "failed!\n"
 	fi
-
 }
 
 resize_test()
