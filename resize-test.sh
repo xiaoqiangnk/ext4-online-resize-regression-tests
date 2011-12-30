@@ -5,6 +5,7 @@ MOUNT=mount
 UMOUNT=umount
 MKFS=mkfs
 RESIZEFS=resize2fs
+FSCK=fsck
 feature_list="uninit_bg flex_bg bigalloc"
 extended_list="lazy_itable_init"
 
@@ -44,9 +45,14 @@ makefs()
 resizefs()
 {
 	echo "resizing $DEVICE from $FROM to $TO..."
-	if $RESIZEFS $DEVICE $TO &>/dev/null ; then
+	if $RESIZEFS $DEVICE $TO >/dev/null ; then
+		$UMOUNT $DEVICE
+		$FSCK -yf $DEVICE || (echo -e "fsck failed!\n"; exit 1)
+
+		$MOUNT $DEVICE $MNTDIR
 		size_human=`df -h /dev/sdc1 | awk '$1~"/dev/sdc1" {sub("\.0", "", $2); print $2}'`
 		size=`df /dev/sdc1 | awk '$1~"/dev/sdc1" {print $2}'`
+		echo $size $size_human
 		if [ $size = $TO ] || [ $size_human = $TO ] ; then
 			echo -e "succeeded!\n"
 		else
@@ -61,8 +67,11 @@ resize_test()
 {
 	$UMOUNT $DEVICE &>/dev/null
 	makefs $1 $FROM
-	$MOUNT -o debug $DEVICE $MNTDIR
-	resizefs
+	if $MOUNT -o debug $DEVICE $MNTDIR &>/dev/null; then
+		resizefs
+	else
+		echo -e "can not mount $DEVICE on $MNTDIR as $FSTYP\n"
+	fi
 }
 
 resize_tests()
