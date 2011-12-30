@@ -67,10 +67,11 @@ resize_test()
 {
 	$UMOUNT $DEVICE &>/dev/null
 	makefs $1 $FROM
-	if $MOUNT -o debug $DEVICE $MNTDIR &>/dev/null; then
+	# test for ext4
+	if $MOUNT -t ext4 $DEVICE $MNTDIR &>/dev/null; then
 		resizefs
 	else
-		echo -e "can not mount $DEVICE on $MNTDIR as $FSTYP\n"
+		echo -e "can not mount $DEVICE on $MNTDIR as ext4\n"
 	fi
 }
 
