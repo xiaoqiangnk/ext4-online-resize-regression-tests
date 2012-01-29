@@ -6,7 +6,7 @@ UMOUNT=umount
 MKFS=mkfs
 RESIZEFS=resize2fs
 FSCK=fsck
-feature_list="uninit_bg flex_bg bigalloc"
+feature_list="uninit_bg flex_bg bigalloc meta_bg"
 extended_list="lazy_itable_init"
 
 usage()
@@ -21,6 +21,9 @@ makefs()
 	bit=1
 	for feature in $feature_list ; do
 		if (($1 & bit)) ; then
+			if [ $feature = "meta_bg" ] ; then
+				opts="$opts^resize_inode,"
+			fi
 			opts="$opts$feature,"
 		else
 			opts="$opts^$feature,"
